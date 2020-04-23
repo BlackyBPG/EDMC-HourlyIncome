@@ -3,6 +3,7 @@
 Das ist ein einfaches Plugin für den [ED MarketConnector](https://github.com/Marginal/EDMarketConnector/wiki), basierend aufdem Original [EDMC-HourlyIncome](https://github.com/Exynom/EDMC-HourlyIncome) vom Exynom!
 
 ![In-game Screenshot](edmc_plugins_hi.png)
+
 ![In-game Screenshot](edmc_plugins_light.png) ![In-game Screenshot](edmc_plugins_dark.png)
 
 
