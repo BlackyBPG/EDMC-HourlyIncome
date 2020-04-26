@@ -24,7 +24,7 @@ try:
 except ImportError:
     config = dict()
 
-APP_VERSION = "20.04.18_b1920"
+APP_VERSION = "20.04.26_b0049"
 
 CFG_EARNINGS = "EarningSpeed_earnings"
 CFG_DOCKINGS = "EarningSpeed_dockings"
@@ -408,7 +408,7 @@ def journal_entry(cmdr, is_beta, system, station, entry, state):
         elif "Loadout" in entry["event"]:
             this.hourlyincome.loockup(0)
         elif "Statistics" in entry["event"]:
-            this.jumpspeed.start_data(entry["Time_Played"])
+            this.hourlyincome.start_data(entry["Exploration"]["Time_Played"])
         elif "MarketSell" in entry["event"]:
             this.hourlyincome.transaction(entry["TotalSale"])
         elif "MarketBuy" in entry["event"]:
