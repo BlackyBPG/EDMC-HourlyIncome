@@ -24,7 +24,7 @@ try:
 except ImportError:
     config = dict()
 
-APP_VERSION = "20.06.06_b1701"
+APP_VERSION = "20.06.06_b2135"
 
 CFG_EARNINGS = "EarningSpeed_earnings"
 CFG_DOCKINGS = "EarningSpeed_dockings"
@@ -62,7 +62,6 @@ class HourlyIncome(object):
     def reset(self):
         """
         Reset button pressed
-        !! disabled for better visuals in app
         """
         self.transactions = []
         self.att_loockup = 0
@@ -71,7 +70,6 @@ class HourlyIncome(object):
         self.saved_time = 0
         self.start_time = 0
         self.update_window()
-        self.save()
 
     def load(self):
         """
