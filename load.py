@@ -24,14 +24,14 @@ try:
 except ImportError:
     config = dict()
 
-APP_VERSION = "20.04.26_b0049"
+APP_VERSION = "20.06.06_b1701"
 
 CFG_EARNINGS = "EarningSpeed_earnings"
 CFG_DOCKINGS = "EarningSpeed_dockings"
 CFG_TIME = "EarningSpeed_time"
-CFG_DESIGN = "EarningSpeed_design"
-COLOR_RED = ("#AD1616", "#FF4040")
-COLOR_NORM = ("#000000", "#80FFFF")
+CFG_DESIGN = "theme"
+COLOR_RED = ("#AD1616", "#FF4040", "#FF4040")
+COLOR_NORM = ("#000000", "#80FFFF", "#80FFFF")
 
 
 class Transaction(object):
@@ -77,8 +77,8 @@ class HourlyIncome(object):
         """
         Load saved earnings, saved dockings and saved gametime from config
         """
-        if config.get(CFG_DESIGN):
-            self.appdesign = int(config.get(CFG_DESIGN))
+        if config.getint(CFG_DESIGN):
+            self.appdesign = config.getint(CFG_DESIGN)
         else:
            self.appdesign = 0
 
@@ -192,7 +192,7 @@ class HourlyIncome(object):
         Get the station visits/hr rate
         :return dockings overall per hour:
         """
-        if len(self.transactions) > 1:
+        if len(self.transactions) > 1 and self.sincetime() > 0:
             return (self.saved_docking + self.dockings()) / (self.saved_time + self.sincetime())
         elif self.saved_docking > 0:
             return self.saved_docking / self.saved_time
@@ -204,7 +204,7 @@ class HourlyIncome(object):
         Get the station visits/hr rate
         :return dockings for this trip per hour:
         """
-        if len(self.transactions) > 1:
+        if len(self.transactions) > 1 and self.sincetime() > 0:
             return self.dockings() / self.sincetime()
         else:
             return 0.0
@@ -214,7 +214,7 @@ class HourlyIncome(object):
         Get the earning speed in Cr/hr
         :return earnings overall per hour:
         """
-        if len(self.transactions) > 1:
+        if len(self.transactions) > 1 and self.sincetime() > 0:
             return (self.saved_earnings + self.trip_earnings()) / (self.saved_time + self.sincetime())
         elif self.saved_earnings > 1:
             return self.saved_earnings / self.saved_time
@@ -226,7 +226,7 @@ class HourlyIncome(object):
         Get the earning speed in Cr/hr
         :return earnings for trip per hour:
         """
-        if len(self.transactions) > 1:
+        if len(self.transactions) > 1 and self.sincetime() > 0:
             return self.trip_earnings() / self.sincetime()
         else:
             return 0.0
@@ -296,25 +296,10 @@ class HourlyIncome(object):
         self.single_widget.after(0, self.single_widget.config, {"text": msg})
 
 
-
-def plugin_prefs(parent, cmdr, is_beta):
-    if config.get(CFG_DESIGN) != None:
-        this.appdesign = tk.IntVar(value=config.get(CFG_DESIGN))
-    else:
-        this.appdesign = tk.IntVar(value=0)
-
-    frame = nb.Frame(parent)
-    nb.Label(frame, text="HourlyIncome-EDMC Version: {INSTALLED}\n".format(INSTALLED=APP_VERSION)).grid(padx=10, sticky=tk.W)
-    nb.Checkbutton(frame, text=_("Dark Theme").encode('utf-8'), variable=this.appdesign, onvalue = 1, offvalue = 0).grid(padx=10, pady = 3, sticky=tk.W)
-    return frame
-
-
 def prefs_changed(cmdr, is_beta):
     hourlyincome = this.hourlyincome
-    hourlyincome.appdesign = int(this.appdesign.get())
-    config.set(CFG_DESIGN, str(hourlyincome.appdesign))
+    hourlyincome.appdesign = config.getint(CFG_DESIGN)
     hourlyincome.update_window()
-
 
 def plugin_start3(plugin_dir):
     hourlyincome = HourlyIncome()
@@ -401,7 +386,11 @@ def journal_entry(cmdr, is_beta, system, station, entry, state):
     """
     if "event" in entry:
         # ! trading
-        if "LoadGame" in entry["event"]:
+        if "Shutdown" in entry["event"]:
+            this.hourlyincome.save()
+            this.hourlyincome.reset()
+            this.hourlyincome.load()
+        elif "LoadGame" in entry["event"]:
             this.hourlyincome.saved_earnings = entry["Credits"]
             this.hourlyincome.starttime()
             this.hourlyincome.loockup(1)

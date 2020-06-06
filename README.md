@@ -39,9 +39,7 @@ Der Durchschnittsverdienst der gesamten Spielzeit wird automatisch errechnet anh
 
 ## Wichtiges
 
-Das Plugin erkennt nicht automatisch welches Design (Theme) man in EDMC aktiviert hat, weshalb es eine Optionsseite mit der möglichkeit der Designwahl für das Plugin gibt.
-
-![EDMC Optionen](edmc_options_hourlyincome.png)
+~~Das Plugin erkennt nicht automatisch welches Design (Theme) man in EDMC aktiviert hat, weshalb es eine Optionsseite mit der möglichkeit der Designwahl für das Plugin gibt.~~
 
 
 ## Weiteres
