@@ -24,7 +24,7 @@ try:
 except ImportError:
     config = dict()
 
-APP_VERSION = "20.06.06_b2135"
+APP_VERSION = "20.07.04_b0930"
 
 CFG_EARNINGS = "EarningSpeed_earnings"
 CFG_DOCKINGS = "EarningSpeed_dockings"
@@ -442,14 +442,26 @@ def journal_entry(cmdr, is_beta, system, station, entry, state):
             this.hourlyincome.transaction(-entry["Quantity"])
         # ! fees
         elif "PayBounties" in entry["event"]:
-            this.hourlyincome.transaction(-entry["Amount"])
+            brokerCost = 0
+            if "BrokerPercentage" in entry["event"]:
+                brokerCost = entry["Amount"] * (entry["BrokerPercentage"] / 100)
+            this.hourlyincome.transaction(-(entry["Amount"] + brokerCost))
         elif "PayFines" in entry["event"]:
-            this.hourlyincome.transaction(-entry["Amount"])
+            brokerCost = 0
+            if "BrokerPercentage" in entry["event"]:
+                brokerCost = entry["Amount"] * (entry["BrokerPercentage"] / 100)
+            this.hourlyincome.transaction(-(entry["Amount"] + brokerCost))
         elif "PayLegacyFines" in entry["event"]:
-            this.hourlyincome.transaction(-entry["Amount"])
+            brokerCost = 0
+            if "BrokerPercentage" in entry["event"]:
+                brokerCost = entry["Amount"] * (entry["BrokerPercentage"] / 100)
+            this.hourlyincome.transaction(-(entry["Amount"] + brokerCost))
         # ! combat
         elif "RedeemVoucher" in entry["event"]:
-            this.hourlyincome.transaction(entry["Amount"])
+            brokerCost = 0
+            if "BrokerPercentage" in entry["event"]:
+                brokerCost = entry["Amount"] * (entry["BrokerPercentage"] / 100)
+            this.hourlyincome.transaction(entry["Amount"] - brokerCost)
         # ! exploration
         elif "BuyExplorationData" in entry["event"]:
             this.hourlyincome.transaction(-entry["Cost"])
@@ -461,8 +473,8 @@ def journal_entry(cmdr, is_beta, system, station, entry, state):
         elif "SearchAndRescue" in entry["event"]:
             this.hourlyincome.transaction(entry["Reward"])
         elif "MissionCompleted" in entry["event"]:
-            if "Dontation" in entry:
-                this.hourlyincome.transaction(-entry["Dontation"])
+            if "Donation" in entry:
+                this.hourlyincome.transaction(-entry["Donation"])
             else:
                 this.hourlyincome.transaction(entry["Reward"])
         # ! npc crew
