@@ -24,7 +24,7 @@ try:
 except ImportError:
     config = dict()
 
-APP_VERSION = "20.07.04_b0930"
+APP_VERSION = "21.01.02_b1342"
 
 CFG_EARNINGS = "EarningSpeed_earnings"
 CFG_DOCKINGS = "EarningSpeed_dockings"
@@ -192,7 +192,7 @@ class HourlyIncome(object):
         """
         if len(self.transactions) > 1 and self.sincetime() > 0:
             return (self.saved_docking + self.dockings()) / (self.saved_time + self.sincetime())
-        elif self.saved_docking > 0:
+        elif self.saved_docking > 0 and self.saved_time > 0:
             return self.saved_docking / self.saved_time
         else:
             return 0
@@ -214,7 +214,7 @@ class HourlyIncome(object):
         """
         if len(self.transactions) > 1 and self.sincetime() > 0:
             return (self.saved_earnings + self.trip_earnings()) / (self.saved_time + self.sincetime())
-        elif self.saved_earnings > 1:
+        elif self.saved_earnings > 1 and self.saved_time > 0:
             return self.saved_earnings / self.saved_time
         else:
             return 0
@@ -319,9 +319,9 @@ def plugin_app(parent):
 
     hourlyincome.rate_widget = tk.Label(frame, text="", justify=tk.RIGHT)
     hourlyincome.rate_widget.grid(row=0, column=2, sticky=tk.E)
-    rate_label = tk.Label(frame, text=_("Dock rate:").encode('utf-8'), justify=tk.LEFT)
+    rate_label = tk.Label(frame, text=_("Dock rate:").encode('iso-8859-1'), justify=tk.LEFT)
     rate_label.grid(row=0, column=0, sticky=tk.W)
-    rateT_label = tk.Label(frame, text=_("p.Hr").encode('utf-8'), justify=tk.LEFT)
+    rateT_label = tk.Label(frame, text=_("p.Hr").encode('iso-8859-1'), justify=tk.LEFT)
     rateT_label.grid(row=0, column=4, sticky=tk.W)
 
     hourlyincome.ratenow_widget = tk.Label(frame, text="", justify=tk.RIGHT)
@@ -329,9 +329,9 @@ def plugin_app(parent):
 
     hourlyincome.speed_widget = tk.Label(frame, text="", justify=tk.RIGHT)
     hourlyincome.speed_widget.grid(row=1, column=2, sticky=tk.E)
-    speed_label = tk.Label(frame, text=_("Average:").encode('utf-8'), justify=tk.LEFT)
+    speed_label = tk.Label(frame, text=_("Average:").encode('iso-8859-1'), justify=tk.LEFT)
     speed_label.grid(row=1, column=0, sticky=tk.W)
-    speedT_label = tk.Label(frame, text=_("Cr/hr").encode('utf-8'), justify=tk.LEFT)
+    speedT_label = tk.Label(frame, text=_("Cr/hr").encode('iso-8859-1'), justify=tk.LEFT)
     speedT_label.grid(row=1, column=4, sticky=tk.W)
 
     hourlyincome.speednow_widget = tk.Label(frame, text="", justify=tk.RIGHT)
@@ -339,14 +339,14 @@ def plugin_app(parent):
 
     hourlyincome.single_widget = tk.Label(frame, text="", justify=tk.RIGHT)
     hourlyincome.single_widget.grid(row=2, column=1, sticky=tk.E, columnspan=2)
-    single_label = tk.Label(frame, text=_("Earnings:").encode('utf-8'), justify=tk.LEFT)
+    single_label = tk.Label(frame, text=_("Earnings:").encode('iso-8859-1'), justify=tk.LEFT)
     single_label.grid(row=2, column=0, sticky=tk.W)
     singleT_label = tk.Label(frame, text="Cr", justify=tk.LEFT)
     singleT_label.grid(row=2, column=4, sticky=tk.W)
 
     hourlyincome.earned_widget = tk.Label(frame, text="", justify=tk.RIGHT)
     hourlyincome.earned_widget.grid(row=3, column=1, sticky=tk.E, columnspan=2)
-    earned_label = tk.Label(frame, text=_("Cash holding:").encode('utf-8'), justify=tk.LEFT)
+    earned_label = tk.Label(frame, text=_("Cash holding:").encode('iso-8859-1'), justify=tk.LEFT)
     earned_label.grid(row=3, column=0, sticky=tk.W)
     earnedT_label = tk.Label(frame, text="Cr", justify=tk.LEFT)
     earnedT_label.grid(row=3, column=4, sticky=tk.W)
@@ -388,6 +388,11 @@ def journal_entry(cmdr, is_beta, system, station, entry, state):
             this.hourlyincome.save()
             this.hourlyincome.reset()
             this.hourlyincome.load()
+        elif "Commander" in entry["event"] and "FID" in entry["event"]:
+            if this.hourlyincome.trip_earnings() != 0:
+                this.hourlyincome.save()
+                this.hourlyincome.reset()
+                this.hourlyincome.load()
         elif "LoadGame" in entry["event"]:
             this.hourlyincome.saved_earnings = entry["Credits"]
             this.hourlyincome.starttime()
@@ -473,8 +478,8 @@ def journal_entry(cmdr, is_beta, system, station, entry, state):
         elif "SearchAndRescue" in entry["event"]:
             this.hourlyincome.transaction(entry["Reward"])
         elif "MissionCompleted" in entry["event"]:
-            if "Donation" in entry:
-                this.hourlyincome.transaction(-entry["Donation"])
+            if "Donated" in entry:
+                this.hourlyincome.transaction(-entry["Donated"])
             else:
                 this.hourlyincome.transaction(entry["Reward"])
         # ! npc crew
